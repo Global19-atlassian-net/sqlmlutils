@@ -1701,7 +1701,7 @@ sqlQueryExternalLibrarySetupErrors <- function(hodbc, externalLibraryIds, queryU
         if(colnames(sqlResult)[[1]]=="OBJECT_NOT_FOUND"){
             sqlResult <- NULL
         } else {
-            sqlResult <- cbind(sqlResult, name=externalLibraryIds[ externalLibraryIds[, "external_library_id"]==sqlResult[,"external_library_id"], "name"])
+            sqlResult <- merge(sqlResult, externalLibraryIds, by="external_library_id")
             rownames(sqlResult) <- sqlResult[, "name"]
         }
     }
@@ -1771,7 +1771,7 @@ sqlSyncAndCheckInstalledPackages <- function(hodbc, packages, user = "", queryUs
     setupFailures <- sqlQueryExternalLibrarySetupErrors(hodbc, externalLibraryIds, queryUser)
 
     # issue specific errors for packages that failed to install to the library path
-    if((!is.null(setupFailures)) && (nrow(setupFailures) >0)){
+    if((!is.null(setupFailures)) && (nrow(setupFailures) > 0)){
         errors <- mapply(
             function(packageName, errorCode, errorMessage){
                 sprintf("failed to install package (%s) to library path: user='%s', scope='%s', error code='%s', error message='%s'", packageName, user, scope, as.hexmode(errorCode), errorMessage)
@@ -1866,7 +1866,7 @@ sqlHelperInstallPackages <- function(connectionString, packages, owner = "", sco
         odbcEndTran(hodbc, commit = TRUE)
     }
     , error = function(err) {
-        stop( sprintf("Installation of packages %s failed with error %s", paste(packages[,"Package"], collapse = ', '), err$message), call. = FALSE)
+        stop( sprintf("Installation of packages %s failed with error: %s", paste(packages[,"Package"], collapse = ', '), err$message), call. = FALSE)
     }
     , finally = {
         if(haveTransaction){
