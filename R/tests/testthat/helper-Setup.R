@@ -11,6 +11,10 @@ Sys.setenv(TZ='GMT')
 Sysname <- Sys.info()['sysname']
 cat("INFO: sysname=", Sysname, "\n", sep = "")
 
+# Set this environment variable to run tests
+runTests = TRUE
+if(Sys.getenv("RUN_TESTS") == '') runTests <- FALSE
+
 Driver <- Sys.getenv("DRIVER")
 if (Driver == ''){
     if(Sysname == "Windows"){
@@ -20,6 +24,7 @@ if (Driver == ''){
     }
 }
 cat("INFO: Driver=", Driver, "\n", sep = "")
+
 
 Server <- Sys.getenv("SERVER")
 if (Server == '') Server <- "."
@@ -45,6 +50,7 @@ cnnstr <- connectionInfo(driver=Driver, server=Server, database=Database, uid=Ui
 testthatDir <- getwd()
 R_Root <- file.path(testthatDir, "../..")
 scriptDirectory <- file.path(testthatDir, "scripts")
+dataDirectory <- file.path(testthatDir, "data")
 
 options(repos = c(CRAN="https://cran.microsoft.com", CRANextra = "http://www.stats.ox.ac.uk/pub/RWin"))
 cat("INFO: repos = ", getOption("repos"), sep="\n")
@@ -54,6 +60,7 @@ TestArgs <- list(
     gitRoot = R_Root,
     testDirectory = testthatDir,
     scriptDirectory = scriptDirectory,
+    dataDirectory = dataDirectory,
     driver=Driver,
     server=Server,
     database=Database,
@@ -62,7 +69,8 @@ TestArgs <- list(
     pwdAirlineUserdbowner = PwdAirlineUserdbowner,
     pwdAirlineUser = PwdAirlineUser,
     connectionString = cnnstr,
-    sqlcmd = sqlcmd_path
+    sqlcmd = sqlcmd_path,
+	runTests = runTests
 )
 
 options(TestArgs = TestArgs)
