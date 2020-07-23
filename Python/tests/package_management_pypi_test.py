@@ -88,8 +88,8 @@ def test_dependency_resolution():
 
     try:
         original_pkgs = _get_package_names_list(connection)
-        assert package not in pkgs
-        assert dep_package not in pkgs
+        assert package not in original_pkgs
+        assert dep_package not in original_pkgs
 
         pkgmanager.install(package, version=version, upgrade=True)
         val = pyexecutor.execute_function_in_sql(_package_exists, module_name=package)
@@ -152,22 +152,6 @@ def test_upgrade_parameter():
         sqlpkgs = _get_sql_package_table(connection)
         assert len(sqlpkgs) == len(afterinstall) - 1
 
-    finally:
-        _drop_all_ddl_packages(connection, scope)
-
-
-def test_install_many_packages():
-    packages = [("Markdown","2.6.11"), ("simplejson", "3.0.3")]
-    
-    try:
-        for package, version in packages:
-            pkgmanager.install(package, version=version, upgrade=True)
-            val = pyexecutor.execute_function_in_sql(_package_exists, module_name=package)
-            assert val
-
-            pkgmanager.uninstall(package)
-            val = pyexecutor.execute_function_in_sql(_package_no_exist, module_name=package)
-            assert val
     finally:
         _drop_all_ddl_packages(connection, scope)
 
